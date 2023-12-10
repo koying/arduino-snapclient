@@ -39,7 +39,7 @@ public:
 
   /// Writes audio data to the queue
   virtual size_t write(const uint8_t *data, size_t size) {
-    ESP_LOGD(TAG, "%zu", size);
+    ESP_LOGD(TAG, ">>> write: %zu", size);
     // only start to proces data after we received codec header
     if (!is_audio_begin_called){
       return 0;
@@ -144,6 +144,7 @@ protected:
 
   /// setup of all audio objects
   bool audioBegin() {
+    ESP_LOGD(TAG, ">>> audioBegin");
 
     if (out == nullptr)
       return false;
@@ -173,7 +174,7 @@ protected:
     // set up timed stream
     timed_stream.begin(audio_info);
 
-    ESP_LOGD(TAG, "end");
+    ESP_LOGD(TAG, "<<< audioBegin");
     is_audio_begin_called = true;
     return true;
   }
@@ -192,7 +193,7 @@ protected:
   }
 
   void audioEnd() {
-    ESP_LOGD(TAG, "start");
+    ESP_LOGD(TAG, ">>> audioEnd");
     if (out == nullptr)
       return;
     out->end();
@@ -200,7 +201,7 @@ protected:
 
   // writes the audio data to the decoder
   size_t audioWrite(const void *src, size_t size) {
-    ESP_LOGD(TAG, "%zu", size);
+    ESP_LOGD(TAG, ">>> audioWrite: %zu", size);
     size_t result = decoder_stream.write((const uint8_t *)src, size);
 
     return result;

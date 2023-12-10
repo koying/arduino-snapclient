@@ -24,6 +24,7 @@ public:
   }
 
   virtual bool begin() {
+    ESP_LOGD(TAG, ">>> begin");
     bool result = false;
     if (output_start) {
       result = audioBegin();
