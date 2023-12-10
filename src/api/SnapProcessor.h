@@ -40,7 +40,7 @@ public:
   }
 
   virtual void end() {
-    ESP_LOGD(TAG, "start");
+    ESP_LOGD(TAG, ">>> end");
     audioEnd();
     send_receive_buffer.resize(0);
     base_message_serialized.resize(0);
@@ -113,7 +113,7 @@ protected:
   SnapTime &snap_time = SnapTime::instance();
 
   void processLoop(void *pvParameters = nullptr) {
-    ESP_LOGI(TAG, "processLoop");
+    ESP_LOGI(TAG, ">>> processLoop");
 
     while (true) {
       ESP_LOGD(TAG, "startig new connection");
@@ -155,16 +155,16 @@ protected:
   }
 
   bool resizeData() {
-    ESP_LOGD(TAG, "start");
+    ESP_LOGD(TAG, ">>> resizeData");
     audio.resize(frame_size);
     send_receive_buffer.resize(CONFIG_SNAPCAST_BUFF_LEN);
     base_message_serialized.resize(BASE_MESSAGE_SIZE);
-    ESP_LOGD(TAG, "end!");
+    ESP_LOGD(TAG, "<<< resizeData");
     return true;
   }
 
   bool processMessageLoop() {
-    ESP_LOGD(TAG, "start");
+    ESP_LOGD(TAG, ">>> processMessageLoop");
 
     if (!readBaseMessage())
       return false;
@@ -207,7 +207,7 @@ protected:
   }
 
   bool connectClient() {
-    ESP_LOGD(TAG, "start");
+    ESP_LOGD(TAG, ">>> connectClient");
     p_client->setTimeout(CONFIG_CLIENT_TIMEOUT_SEC);
     if (!p_client->connect(server_ip, server_port)) {
       ESP_LOGE(TAG, "... socket connect failed errno=%d", errno);
@@ -218,7 +218,7 @@ protected:
   }
 
   bool writeHallo() {
-    ESP_LOGD(TAG, "start");
+    ESP_LOGD(TAG, ">>> writeHallo");
     // setup base_message
     base_message.type = SNAPCAST_MESSAGE_HELLO;
     base_message.id = 0x0;
@@ -262,7 +262,7 @@ protected:
   }
 
   bool readBaseMessage() {
-    ESP_LOGD(TAG, "%d", BASE_MESSAGE_SIZE);
+    ESP_LOGD(TAG, ">>> readBaseMessage: %d", BASE_MESSAGE_SIZE);
     // Wait for timeout
     // uint64_t end = millis() + CONFIG_WEBSOCKET_SERVER_TIMEOUT_SEC * 1000;
     while (p_client->available() < BASE_MESSAGE_SIZE) {
@@ -289,7 +289,7 @@ protected:
   }
 
   bool readData() {
-    ESP_LOGD(TAG, "%d", base_message.size);
+    ESP_LOGD(TAG, ">>> readData: %d", base_message.size);
     if (base_message.size > send_receive_buffer.size()) {
       send_receive_buffer.resize(base_message.size);
     }
@@ -301,7 +301,7 @@ protected:
   }
 
   bool processMessageCodecHeader() {
-    ESP_LOGD(TAG, "start");
+    ESP_LOGD(TAG, ">>> processMessageCodecHeader");
     SnapMessageCodecHeader codec_header_message;
     start = &send_receive_buffer[0];
     int result = codec_header_message.deserialize(start, size);
@@ -339,7 +339,7 @@ protected:
   }
 
   bool processMessageCodecHeaderOpus(codec_type codecType) {
-    ESP_LOGD(TAG, "start");
+    ESP_LOGD(TAG, ">>> processMessageCodecHeaderOpus");
     uint32_t rate;
     memcpy(&rate, start + 4, sizeof(rate));
     uint16_t bits;
@@ -354,7 +354,7 @@ protected:
   }
 
   bool processMessageCodecHeaderExt(codec_type codecType) {
-    ESP_LOGD(TAG, "start");
+    ESP_LOGD(TAG, ">>> processMessageCodecHeaderExt");
     codec_from_server = codecType;
     audioBegin();
     // send the data to the codec
@@ -363,7 +363,7 @@ protected:
   }
 
   bool processMessageWireChunk() {
-    ESP_LOGD(TAG, "start");
+    ESP_LOGD(TAG, ">>> processMessageWireChunk");
     start = &send_receive_buffer[0];
     SnapMessageWireChunk wire_chunk_message;
     memset((void*)&wire_chunk_message, 0, sizeof(wire_chunk_message));
@@ -388,7 +388,7 @@ protected:
   }
 
   bool wireChunk(SnapMessageWireChunk &wire_chunk_message) {
-    ESP_LOGD(TAG, "start");
+    ESP_LOGD(TAG, ">>> wireChunk");
     SnapAudioHeader header;
     header.size = wire_chunk_message.size;
     
@@ -407,7 +407,7 @@ protected:
   }
 
   bool processMessageServerSettings() {
-    ESP_LOGD(TAG, "start");
+    ESP_LOGD(TAG, ">>> processMessageServerSettings");
     SnapMessageServerSettings server_settings_message;
 
     // The first 4 bytes in the buffer are the size of the string.
@@ -444,7 +444,7 @@ protected:
   }
 
   bool processMessageTime() {
-    ESP_LOGD(TAG, "start");
+    ESP_LOGD(TAG, ">>> processMessageTime");
     int result = time_message.deserialize(start, size);
     if (result) {
       ESP_LOGI(TAG, "Failed to deserialize time message");
@@ -473,7 +473,7 @@ protected:
   }
 
   bool writeTimedMessage() {
-    ESP_LOGD(TAG, "start");
+    ESP_LOGD(TAG, ">>> writeTimedMessage");
     uint32_t time_ms = millis() - last_time_sync;
     if (time_ms >= 1000) {
       last_time_sync = millis();
@@ -485,7 +485,7 @@ protected:
   }
 
   bool writeMessage() {
-    ESP_LOGD(TAG, "start");
+    ESP_LOGD(TAG, ">>> writeMessage");
 
     now = snap_time.time();
 
