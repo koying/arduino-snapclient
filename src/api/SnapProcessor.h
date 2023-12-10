@@ -457,6 +457,7 @@ protected:
     ttx.tv_usec = base_message.sent.usec;
     trx.tv_sec = base_message.received.sec;
     trx.tv_usec = base_message.received.usec;
+    ESP_LOGD(TAG, "%ld; %ld -- %ld; %ld", ttx.tv_sec, ttx.tv_usec, trx.tv_sec, trx.tv_usec);
 
     // for time management
     snap_time.updateServerTime(trx);
